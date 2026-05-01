@@ -181,28 +181,49 @@ CLI flags passed as `--key value` are stored in `Context` as `"--key"` → value
 
 ---
 
-## JSON Handling (use `Builder`, not Gson/Jackson)
+## JSON Handling (use `Builder` and `Builders`, not Gson/Jackson)
+
+The `Builder` class is used for JSON objects (`{}`), while the `Builders` class is used for JSON arrays (`[]`). **Always use `Builders` instead of `List<Builder>`** to avoid generic type erasure issues during JSON serialization.
 
 ```java
 import org.tinystruct.data.component.Builder;
+import org.tinystruct.data.component.Builders;
 
-// Serialize
+// 1. Serialize a Single Object
 Builder response = new Builder();
 response.put("status", "success");
 response.put("count", 42);
-response.put("data", someList);
-return response; // {"status":"success","count":42,...}
 
-// Parse
-Builder parsed = new Builder();
-parsed.parse(jsonString);
-String status = parsed.get("status").toString();
+// 2. Serialize a List of Objects using Builders
+Builders dataList = new Builders();
+for (MyModel item : myCollection) {
+    Builder b = new Builder();
+    b.put("id", item.getId());
+    b.put("name", item.getName());
+    dataList.add(b);
+}
+response.put("data", dataList);
+return response.toString(); // {"status":"success","count":42,"data":[{"id":1,"name":"X"}]}
+
+// 3. Parse a JSON Object
+Builder parsedObj = new Builder();
+parsedObj.parse(jsonString);
+String status = parsedObj.get("status").toString();
+
+// 4. Parse a JSON Array
+Builders parsedArray = new Builders();
+parsedArray.parse(jsonArrayString);
+for (int i = 0; i < parsedArray.size(); i++) {
+    Builder item = parsedArray.get(i);
+    System.out.println(item.get("name"));
+}
 ```
 
-### Why use `Builder`?
+### Why use `Builder` and `Builders`?
 - **Zero External Dependencies**: Keeps your application lean and fast.
 - **Native Integration**: Works seamlessly with `AbstractApplication` result handling.
 - **Performance**: Optimized for the specific data structures used within the framework.
+- **Type Safety**: The framework natively understands how to serialize `Builders` to a JSON array `[]`, whereas `List<Builder>` can sometimes lead to runtime casting issues.
 
 ## Session Management (Web Mode)
 
