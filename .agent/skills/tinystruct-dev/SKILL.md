@@ -1,6 +1,6 @@
 ---
 name: tinystruct-dev
-description: Expert guidance for developing with the tinystruct Java framework. Use this skill whenever working on the tinystruct codebase or any project built on tinystruct — including creating new Application classes, adding @Action-mapped routes, writing unit tests, working with ActionRegistry, setting up HTTP/CLI dual-mode handling, configuring the built-in HTTP server, using the event system, handling JSON with Builder, or debugging routing and context issues. Trigger this skill for any task involving tinystruct patterns, framework internals, or developer conventions.
+description: Expert guidance for developing with the tinystruct Java framework. Use this skill whenever working on the tinystruct codebase or any project built on tinystruct — including creating new Application classes, adding @Action-mapped routes, writing unit tests, working with ActionRegistry, setting up HTTP/CLI dual-mode handling, configuring the built-in HTTP server, using the event system, handling JSON with Builder, or debugging routing and context issues. Trigger this skill for any task involving tinystruct patterns, framework internals, developer conventions, and Server-Sent Events (SSE).
 ---
 
 # Developer Skill - tinystruct framework
@@ -275,6 +275,57 @@ public String upload(Request<?, ?> request) throws ApplicationException {
 }
 ```
 ---
+
+## Server-Sent Events (SSE)
+
+`tinystruct` provides native support for Server-Sent Events (SSE) for real-time, one-way communication from server to client.
+
+### How it Works
+1. **Client Request**: A client initiates a connection with the `Accept: text/event-stream` header.
+2. **Automatic Handling**: The built-in `HttpServer` detects this header and automatically handles the SSE lifecycle, including setting headers (`Connection: keep-alive`, `Cache-Control: no-cache`, etc.) and registering the client.
+3. **Session Binding**: Connections are tracked by session ID in the `SSEPushManager`.
+
+### Implementing an SSE Action
+Define an `@Action` that returns an initial message or configuration. The framework will keep the connection open and register the client.
+
+```java
+import org.tinystruct.http.SSEPushManager;
+import org.tinystruct.data.component.Builder;
+
+@Action("sse/connect")
+public String connect() {
+    // Initial handshake message
+    return "{\"type\":\"connect\",\"message\":\"Connected to SSE\"}";
+}
+```
+
+### Pushing Data to Clients
+Use `SSEPushManager` to send messages to specific clients or broadcast to everyone.
+
+```java
+// 1. Push to a specific session
+String sessionId = getContext().getId();
+Builder message = new Builder();
+message.put("text", "Hello, user!");
+SSEPushManager.getInstance().push(sessionId, message);
+
+// 2. Broadcast to all connected clients
+Builder broadcastMsg = new Builder();
+broadcastMsg.put("event", "alert");
+broadcastMsg.put("content", "System maintenance in 5 minutes");
+SSEPushManager.getInstance().broadcast(broadcastMsg);
+```
+
+### Message Formatting
+`SSEPushManager` automatically formats the `Builder` or `String` into valid SSE format:
+- If `type` is `"connect"`, it sends `event: connect\ndata: Connected\n\n`.
+- Otherwise, it sends `data: <JSON_STRING>\n\n`.
+
+### Managing Connections
+- **Registration**: Done automatically by the server when the action is invoked with the correct headers.
+- **Removal**: Call `SSEPushManager.getInstance().remove(sessionId)` to close and remove a client.
+- **Client IDs**: Access all active session IDs via `SSEPushManager.getInstance().getClientIds()`.
+
 
 ## Event System
 
