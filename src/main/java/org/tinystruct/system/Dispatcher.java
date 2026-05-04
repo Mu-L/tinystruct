@@ -942,8 +942,21 @@ public class Dispatcher extends AbstractApplication implements RemoteDispatcher 
         } else {
             tableNames = getContext().getAttribute("--tables").toString();
         }
+        String appsPackage = getConfiguration().get("default.apps.package");
+        if (appsPackage == null || appsPackage.trim().isEmpty()) {
+            appsPackage = detectDefaultPackage();
+        }
 
-        System.out.print("Please specify the base path to place the Java code files. [src/main/java/custom/objects]:");
+        String defaultPath = "src/main/java/custom/objects";
+        if (appsPackage != null && !appsPackage.trim().isEmpty()) {
+            if (appsPackage.endsWith(".application")) {
+                defaultPath = "src/main/java/" + appsPackage.substring(0, appsPackage.lastIndexOf(".application")).replace('.', '/') + "/objects";
+            } else {
+                defaultPath = "src/main/java/" + appsPackage.replace('.', '/') + "/objects";
+            }
+        }
+
+        System.out.print("Please specify the base path to place the Java code files. [" + defaultPath + "]:");
         String basePath = scanner.nextLine();
 
         System.out.print("Please specify the packages to be imported in code and use delimiter `;` for multiple items. [java.time.LocalDateTime]:");
@@ -982,7 +995,7 @@ public class Dispatcher extends AbstractApplication implements RemoteDispatcher 
         try {
             String packageName;
 
-            basePath = basePath.isBlank() ? "src/main/java/custom/objects" : basePath;
+            basePath = basePath.isBlank() ? defaultPath : basePath;
             if (basePath.endsWith("/")) {
                 generator.setPath(basePath);
             } else {
@@ -1177,6 +1190,48 @@ public class Dispatcher extends AbstractApplication implements RemoteDispatcher 
 
         builder.append("\nRun 'bin").append(File.separator).append("dispatcher COMMAND --help' for more information on a command.");
         return builder.toString();
+    }
+
+    private String detectDefaultPackage() {
+        String rootPath = "src/main/java";
+        File root = new File(rootPath);
+        if (!root.exists() || !root.isDirectory()) {
+            return "custom";
+        }
+
+        return findPackage(root, "");
+    }
+
+    private String findPackage(File root, String currentPackage) {
+        File[] files = root.listFiles();
+        if (files == null) return null;
+
+        for (File f : files) {
+            if (f.isFile() && f.getName().endsWith(".java")) {
+                return currentPackage;
+            }
+        }
+
+        for (File f : files) {
+            if (f.isDirectory()) {
+                if (f.getName().equals("org") && currentPackage.isEmpty()) {
+                    // Try to find other packages first before settling for 'org'
+                    File[] siblings = root.listFiles(File::isDirectory);
+                    if (siblings != null && siblings.length > 1) {
+                        for (File s : siblings) {
+                            if (!s.getName().equals("org")) {
+                                String found = findPackage(s, s.getName());
+                                if (found != null) return found;
+                            }
+                        }
+                    }
+                }
+                String p = currentPackage.isEmpty() ? f.getName() : currentPackage + "." + f.getName();
+                String found = findPackage(f, p);
+                if (found != null) return found;
+            }
+        }
+        return null;
     }
 
     static class FORE_COLOR {

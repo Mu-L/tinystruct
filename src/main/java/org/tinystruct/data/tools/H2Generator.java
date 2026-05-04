@@ -24,7 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class H2Generator extends MySQLGenerator {
-    private final static Logger logger = Logger.getLogger(MSSQLGenerator.class.getName());
+    private final static Logger logger = Logger.getLogger(H2Generator.class.getName());
     private String path;
     private String packageName;
     private String[] packageList;
@@ -54,15 +54,16 @@ public class H2Generator extends MySQLGenerator {
 
         String spliter = "";
 
+        String fullPath;
         if (this.path.endsWith("/"))
-            this.path = this.path + className;
+            fullPath = this.path + className;
         else
-            this.path = this.path + File.separator + className;
+            fullPath = this.path + File.separator + className;
 
         if (this.packageName != null) {
             java_resource.append("package ").append(this.packageName).append(";\r\n");
         } else {
-            java_resource.append("package org.tinystruct.customer.object;\r\n");
+            java_resource.append("package org.tinystruct.custom.object;\r\n");
         }
 
         java_resource.append("import java.io.Serializable;\r\n");
@@ -146,6 +147,10 @@ public class H2Generator extends MySQLGenerator {
                         java_method_declaration.append("\tpublic Integer get").append(propertyNameOfMethod).append("()\r\n");
                         java_method_declaration.append("\t{\r\n");
                         java_method_declaration.append("\t\treturn Integer.parseInt(this.").append(propertyNameOfMethod).append(".toString());\r\n");
+                    } else if ("long".equalsIgnoreCase(propertyType)) {
+                        java_method_declaration.append("\tpublic Long get").append(propertyNameOfMethod).append("()\r\n");
+                        java_method_declaration.append("\t{\r\n");
+                        java_method_declaration.append("\t\treturn Long.parseLong(this.").append(propertyNameOfMethod).append(".toString());\r\n");
                     }
 
                     java_method_declaration.append("\t}\r\n\r\n");
@@ -195,10 +200,10 @@ public class H2Generator extends MySQLGenerator {
             }
         }
 
-        Path java_src_path = Paths.get(this.path);
+        Path java_src_path = Paths.get(fullPath);
 
         // Replace path separators to handle Windows paths
-        String normalizedPath = this.path.replace("\\", "/");
+        String normalizedPath = fullPath.replace("\\", "/");
         String resourcePath = normalizedPath.replace("main/java", "main/resources");
         Path java_resource_path = Paths.get(resourcePath + ".map.xml");
 
@@ -240,7 +245,7 @@ public class H2Generator extends MySQLGenerator {
         java_resource.append("\t}\r\n\r\n");
         java_resource.append("}");
 
-        FileGenerator generator = new FileGenerator(this.path + ".java", java_resource);
+        FileGenerator generator = new FileGenerator(fullPath + ".java", java_resource);
         generator.save();
     }
 

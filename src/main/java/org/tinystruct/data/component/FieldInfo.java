@@ -122,6 +122,29 @@ public class FieldInfo extends ConcurrentHashMap<String, Object> {
         return Integer.parseInt(svalue);
     }
 
+    public long longValue() {
+        Object value = this.value();
+
+        if (value == null)
+            return -1;
+
+        String svalue = value.toString();
+        if (svalue.lastIndexOf('.') != -1) {
+            svalue = svalue.substring(0, svalue.indexOf('.'));
+        }
+
+        return Long.parseLong(svalue);
+    }
+
+    public float floatValue() {
+        Object value = this.value();
+
+        if (value == null)
+            return 0.0f;
+
+        return Float.parseFloat(value.toString());
+    }
+
     public boolean booleanValue() {
         Object value = this.value();
         if (value == null)

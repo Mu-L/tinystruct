@@ -15,7 +15,6 @@
  *******************************************************************************/
 package org.tinystruct.data.tools;
 
-
 import org.tinystruct.ApplicationException;
 import org.tinystruct.data.DatabaseOperator;
 import org.tinystruct.data.component.*;
@@ -45,21 +44,21 @@ public class MSSQLGenerator implements Generator {
 
     public MSSQLGenerator() {
         this.path = "src/main/java/org/tinystruct/custom/object";
-        this.packageList = new String[]{};
+        this.packageList = new String[] {};
     }
 
     @Override
-	public void setPath(String path) {
+    public void setPath(String path) {
         this.path = path;
     }
 
     @Override
-	public void setPackageName(String packageName) {
+    public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
 
     @Override
-	public void create(String className, String table) throws ApplicationException {
+    public void create(String className, String table) throws ApplicationException {
         StringBuilder java_resource = new StringBuilder();
         StringBuilder java_member_declaration = new StringBuilder();
         StringBuilder java_method_declaration = new StringBuilder();
@@ -68,15 +67,16 @@ public class MSSQLGenerator implements Generator {
 
         String spliter = "";
 
+        String fullPath;
         if (this.path.endsWith("/"))
-            this.path = this.path + className;
+            fullPath = this.path + className;
         else
-            this.path = this.path + File.separator + className;
+            fullPath = this.path + File.separator + className;
 
         if (this.packageName != null) {
             java_resource.append("package ").append(this.packageName).append(";\r\n");
         } else {
-            java_resource.append("package org.tinystruct.customer.object;\r\n");
+            java_resource.append("package org.tinystruct.custom.object;\r\n");
         }
 
         java_resource.append("import java.io.Serializable;\r\n");
@@ -91,12 +91,14 @@ public class MSSQLGenerator implements Generator {
         java_resource.append("\r\n");
         java_resource.append("import org.tinystruct.data.component.Row;\r\n");
         java_resource.append("import org.tinystruct.data.component.AbstractData;\r\n\r\n");
-        java_resource.append("public class ").append(className).append(" extends AbstractData implements Serializable {\r\n");
+        java_resource.append("public class ").append(className)
+                .append(" extends AbstractData implements Serializable {\r\n");
         java_resource.append("	/**\r\n");
         java_resource.append("   * Auto Generated Serial Version UID\r\n");
         java_resource.append("   */\r\n");
         try {
-            java_resource.append("  private static final long serialVersionUID = ").append(SecureRandom.getInstance("SHA1PRNG").nextLong()).append("L;\r\n");
+            java_resource.append("  private static final long serialVersionUID = ")
+                    .append(SecureRandom.getInstance("SHA1PRNG").nextLong()).append("L;\r\n");
         } catch (NoSuchAlgorithmException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
         }
@@ -107,7 +109,8 @@ public class MSSQLGenerator implements Generator {
         classElement.setAttribute("name", className);
         classElement.setAttribute("table", table);
 
-        String command = "SELECT a.name, b.name AS type, a.length, a.typestat AS increment FROM syscolumns a LEFT OUTER JOIN systypes b ON a.xtype = b.xtype WHERE (a.id =(SELECT id FROM sysobjects WHERE name = '" + table + "'))";
+        String command = "SELECT a.name, b.name AS type, a.length, a.typestat AS increment FROM syscolumns a LEFT OUTER JOIN systypes b ON a.xtype = b.xtype WHERE (a.id =(SELECT id FROM sysobjects WHERE name = '"
+                + table + "'))";
         Table data = this.find(command);
         Iterator<Row> listRow = data.iterator();
         Row currentRow;
@@ -128,15 +131,20 @@ public class MSSQLGenerator implements Generator {
                 propertyType = FieldType.valueOf(currentFields.get("type").value().toString()).getRealType();
 
                 String propertyNameOfMethod = StringUtilities.setCharToUpper(propertyName, 0);
-                if (java_method_tostring.length() > 0) spliter = ",";
+                if (java_method_tostring.length() > 0)
+                    spliter = ",";
 
                 if (currentFields.get("name").value().toString().equalsIgnoreCase("id")) {
                     increment = Integer.parseInt(currentFields.get("increment").value().toString()) == 1;
 
                     if ("String".equalsIgnoreCase(propertyType))
-                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"").append(propertyNameOfMethod).append("\\\":\\\"\"+this.get").append(propertyNameOfMethod).append("()+\"\\\"\");\r\n");
+                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"")
+                                .append(propertyNameOfMethod).append("\\\":\\\"\"+this.get")
+                                .append(propertyNameOfMethod).append("()+\"\\\"\");\r\n");
                     else
-                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"").append(propertyNameOfMethod).append("\\\":\"+this.get").append(propertyNameOfMethod).append("());\r\n");
+                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"")
+                                .append(propertyNameOfMethod).append("\\\":\"+this.get").append(propertyNameOfMethod)
+                                .append("());\r\n");
 
                     Element idElement = classElement.addElement("id");
 
@@ -148,38 +156,62 @@ public class MSSQLGenerator implements Generator {
                     idElement.setAttribute("type", currentFields.get("type").value().toString());
 
                     if ("String".equalsIgnoreCase(propertyType)) {
-                        java_method_declaration.append("\tpublic ").append(propertyType).append(" get").append(propertyNameOfMethod).append("()\r\n");
+                        java_method_declaration.append("\tpublic ").append(propertyType).append(" get")
+                                .append(propertyNameOfMethod).append("()\r\n");
                         java_method_declaration.append("\t{\r\n");
-                        java_method_declaration.append("\t\treturn String.valueOf(this.").append(propertyNameOfMethod).append(");\r\n");
+                        java_method_declaration.append("\t\treturn String.valueOf(this.").append(propertyNameOfMethod)
+                                .append(");\r\n");
                     } else if ("int".equalsIgnoreCase(propertyType)) {
-                        java_method_declaration.append("\tpublic Integer get").append(propertyNameOfMethod).append("()\r\n");
+                        java_method_declaration.append("\tpublic Integer get").append(propertyNameOfMethod)
+                                .append("()\r\n");
                         java_method_declaration.append("\t{\r\n");
-                        java_method_declaration.append("\t\treturn Integer.parseInt(this.").append(propertyNameOfMethod).append(".toString());\r\n");
+                        java_method_declaration.append("\t\treturn Integer.parseInt(this.").append(propertyNameOfMethod)
+                                .append(".toString());\r\n");
+                    } else if ("long".equalsIgnoreCase(propertyType)) {
+                        java_method_declaration.append("\tpublic Long get").append(propertyNameOfMethod)
+                                .append("()\r\n");
+                        java_method_declaration.append("\t{\r\n");
+                        java_method_declaration.append("\t\treturn Long.parseLong(this.").append(propertyNameOfMethod)
+                                .append(".toString());\r\n");
                     }
 
                     java_method_declaration.append("\t}\r\n\r\n");
                 } else {
-                    java_member_declaration.append("\tprivate ").append(propertyType).append(" ").append(propertyName).append(";\r\n");
+                    java_member_declaration.append("\tprivate ").append(propertyType).append(" ").append(propertyName)
+                            .append(";\r\n");
 
-                    java_method_declaration.append("\tpublic void set").append(propertyNameOfMethod).append("(").append(propertyType).append(" ").append(propertyName).append(")\r\n");
+                    java_method_declaration.append("\tpublic void set").append(propertyNameOfMethod).append("(")
+                            .append(propertyType).append(" ").append(propertyName).append(")\r\n");
                     java_method_declaration.append("\t{\r\n");
                     if (!propertyType.endsWith("[]")) {
-                        java_method_declaration.append("\t\tthis.").append(propertyName).append(" = this.setFieldAs").append(StringUtilities.setCharToUpper(propertyType, 0)).append("(\"").append(propertyName).append("\",").append(propertyName).append(");\r\n");
+                        java_method_declaration.append("\t\tthis.").append(propertyName).append(" = this.setFieldAs")
+                                .append(StringUtilities.setCharToUpper(propertyType, 0)).append("(\"")
+                                .append(propertyName).append("\",").append(propertyName).append(");\r\n");
                     } else {
-                        java_method_declaration.append("\t\tthis.").append(propertyName).append(" = this.setFieldAs").append(StringUtilities.setCharToUpper(propertyType.replace("[]", "Array"), 0)).append("(\"").append(propertyName).append("\",").append(propertyName).append(");\r\n");
+                        java_method_declaration.append("\t\tthis.").append(propertyName).append(" = this.setFieldAs")
+                                .append(StringUtilities.setCharToUpper(propertyType.replace("[]", "Array"), 0))
+                                .append("(\"").append(propertyName).append("\",").append(propertyName).append(");\r\n");
                     }
                     java_method_declaration.append("\t}\r\n\r\n");
 
-                    if ("String".equalsIgnoreCase(propertyType) || "Date".equalsIgnoreCase(propertyType) || "LocalDateTime".equalsIgnoreCase(propertyType)) {
-                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"").append(propertyName).append("\\\":\\\"\"+this.get").append(propertyNameOfMethod).append("()+\"\\\"\");\r\n");
+                    if ("String".equalsIgnoreCase(propertyType) || "Date".equalsIgnoreCase(propertyType)
+                            || "LocalDateTime".equalsIgnoreCase(propertyType)) {
+                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"")
+                                .append(propertyName).append("\\\":\\\"\"+this.get").append(propertyNameOfMethod)
+                                .append("()+\"\\\"\");\r\n");
                     } else if ("byte[]".equalsIgnoreCase(propertyType)) {
-                        java_method_tostring.append("\t\tif (this.get").append(propertyNameOfMethod).append("() != null) {\r\n");
-                        java_method_tostring.append("\t\t\tbuffer.append(\"").append(spliter).append("\\\"").append(propertyName).append("\\\":\\\"binary-data\\\"\");\r\n");
+                        java_method_tostring.append("\t\tif (this.get").append(propertyNameOfMethod)
+                                .append("() != null) {\r\n");
+                        java_method_tostring.append("\t\t\tbuffer.append(\"").append(spliter).append("\\\"")
+                                .append(propertyName).append("\\\":\\\"binary-data\\\"\");\r\n");
                         java_method_tostring.append("\t\t} else {\r\n");
-                        java_method_tostring.append("\t\t\tbuffer.append(\"").append(spliter).append("\\\"").append(propertyName).append("\\\":null\");\r\n");
+                        java_method_tostring.append("\t\t\tbuffer.append(\"").append(spliter).append("\\\"")
+                                .append(propertyName).append("\\\":null\");\r\n");
                         java_method_tostring.append("\t\t}\r\n");
                     } else {
-                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"").append(propertyName).append("\\\":\"+this.get").append(propertyNameOfMethod).append("());\r\n");
+                        java_method_tostring.append("\t\tbuffer.append(\"").append(spliter).append("\\\"")
+                                .append(propertyName).append("\\\":\"+this.get").append(propertyNameOfMethod)
+                                .append("());\r\n");
                     }
 
                     Element propertyElement = classElement.addElement("property");
@@ -189,25 +221,31 @@ public class MSSQLGenerator implements Generator {
                     propertyElement.setAttribute("length", currentFields.get("length").value().toString());
                     propertyElement.setAttribute("type", currentFields.get("type").value().toString());
 
-                    java_method_declaration.append("\tpublic ").append(propertyType).append(" get").append(propertyNameOfMethod).append("()\r\n");
+                    java_method_declaration.append("\tpublic ").append(propertyType).append(" get")
+                            .append(propertyNameOfMethod).append("()\r\n");
                     java_method_declaration.append("\t{\r\n");
                     java_method_declaration.append("\t\treturn this.").append(propertyName).append(";\r\n");
                     java_method_declaration.append("\t}\r\n\r\n");
                 }
 
-                java_method_setdata.append("\t\tif(row.getFieldInfo(\"").append(currentFields.get("name").value().toString()).append("\")!=null)");
+                java_method_setdata.append("\t\tif(row.getFieldInfo(\"")
+                        .append(currentFields.get("name").value().toString()).append("\")!=null)");
                 if (propertyType.endsWith("[]")) {
-                    java_method_setdata.append("\tthis.set").append(propertyNameOfMethod).append("(row.getFieldInfo(\"").append(currentFields.get("name").value().toString()).append("\").").append(propertyType.replace("[]", "Array")).append("Value());\r\n");
+                    java_method_setdata.append("\tthis.set").append(propertyNameOfMethod).append("(row.getFieldInfo(\"")
+                            .append(currentFields.get("name").value().toString()).append("\").")
+                            .append(propertyType.replace("[]", "Array")).append("Value());\r\n");
                 } else {
-                    java_method_setdata.append("\tthis.set").append(propertyNameOfMethod).append("(row.getFieldInfo(\"").append(currentFields.get("name").value().toString()).append("\").").append(propertyType.toLowerCase()).append("Value());\r\n");
+                    java_method_setdata.append("\tthis.set").append(propertyNameOfMethod).append("(row.getFieldInfo(\"")
+                            .append(currentFields.get("name").value().toString()).append("\").")
+                            .append(propertyType.toLowerCase()).append("Value());\r\n");
                 }
             }
         }
 
-        Path java_src_path = Paths.get(this.path);
+        Path java_src_path = Paths.get(fullPath);
 
         // Replace path separators to handle Windows paths
-        String normalizedPath = this.path.replace("\\", "/");
+        String normalizedPath = fullPath.replace("\\", "/");
         String resourcePath = normalizedPath.replace("main/java", "main/resources");
         Path java_resource_path = Paths.get(resourcePath + ".map.xml");
 
@@ -249,7 +287,7 @@ public class MSSQLGenerator implements Generator {
         java_resource.append("\t}\r\n\r\n");
         java_resource.append("}");
 
-        FileGenerator generator = new FileGenerator(this.path + ".java", java_resource);
+        FileGenerator generator = new FileGenerator(fullPath + ".java", java_resource);
         generator.save();
     }
 
@@ -295,8 +333,7 @@ public class MSSQLGenerator implements Generator {
     }
 
     @Override
-	public void importPackages(String packageNameList) {
-
+    public void importPackages(String packageNameList) {
         this.packageList = packageNameList.split(";");
     }
 }

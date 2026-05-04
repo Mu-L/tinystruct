@@ -857,4 +857,27 @@ public class StringUtilities implements java.io.Serializable {
         }
         return result;
     }
+
+    /**
+     * Converts a plural English word to its singular form.
+     * Note: This is a basic implementation for common cases.
+     *
+     * @param word The word to singularize
+     * @return The singular form of the word
+     */
+    public static String singularize(String word) {
+        if (word == null || word.isEmpty()) {
+            return word;
+        }
+
+        if (word.endsWith("ies") && word.length() > 3) {
+            return word.substring(0, word.length() - 3) + "y";
+        }
+
+        if (word.endsWith("s") && !word.endsWith("ss") && word.length() > 1) {
+            return word.substring(0, word.length() - 1);
+        }
+
+        return word;
+    }
 }

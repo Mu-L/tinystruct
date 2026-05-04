@@ -40,7 +40,7 @@ public final class FieldType implements Serializable {
      * <code>BIGINT</code>.
      */
     private final static int _BIGINT = Types.BIGINT;
-    public final static FieldType BIGINT = new FieldType("BIGINT", _BIGINT, "int");
+    public final static FieldType BIGINT = new FieldType("BIGINT", _BIGINT, "long");
     /**
      * <P>The constant in the Java programming language, sometimes referred
      * to as a type code, that identifies the generic SQL type
@@ -75,7 +75,7 @@ public final class FieldType implements Serializable {
      * <code>REAL</code>.
      */
     private final static int _REAL = Types.REAL;
-    public final static FieldType REAL = new FieldType("REAL", _REAL, "real");
+    public final static FieldType REAL = new FieldType("REAL", _REAL, "float");
     /**
      * <P>The constant in the Java programming language, sometimes referred
      * to as a type code, that identifies the generic SQL type
@@ -89,14 +89,14 @@ public final class FieldType implements Serializable {
      * <code>NUMERIC</code>.
      */
     private final static int _NUMERIC = Types.NUMERIC;
-    public final static FieldType NUMERIC = new FieldType("NUMERIC", _NUMERIC, "int");
+    public final static FieldType NUMERIC = new FieldType("NUMERIC", _NUMERIC, "double");
     /**
      * <P>The constant in the Java programming language, sometimes referred
      * to as a type code, that identifies the generic SQL type
      * <code>DECIMAL</code>.
      */
     private final static int _DECIMAL = Types.DECIMAL;
-    public final static FieldType DECIMAL = new FieldType("DECIMAL", _DECIMAL, "int");
+    public final static FieldType DECIMAL = new FieldType("DECIMAL", _DECIMAL, "double");
     /**
      * <P>The constant in the Java programming language, sometimes referred
      * to as a type code, that identifies the generic SQL type
@@ -127,6 +127,9 @@ public final class FieldType implements Serializable {
      */
     private final static int _LONGVARCHAR = Types.LONGVARCHAR;
     public final static FieldType LONGVARCHAR = new FieldType("LONGVARCHAR", _LONGVARCHAR, "String");
+    public final static FieldType ENUM = new FieldType("ENUM", 0, "String");
+    public final static FieldType SET = new FieldType("SET", 0, "String");
+    public final static FieldType JSON = new FieldType("JSON", 0, "String");
     /**
      * <P>The constant in the Java programming language, sometimes referred
      * to as a type code, that identifies the generic SQL type

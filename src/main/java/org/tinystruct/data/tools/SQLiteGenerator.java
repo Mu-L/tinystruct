@@ -68,12 +68,12 @@ public class SQLiteGenerator implements Generator {
 
         String spliter = "";
 
-        this.path = this.path + className;
+        String fullPath = this.path + className;
 
         if (this.packageName != null) {
             java_resource.append("package ").append(this.packageName).append(";\r\n");
         } else {
-            java_resource.append("package org.tinystruct.customer.object;\r\n");
+            java_resource.append("package org.tinystruct.custom.object;\r\n");
         }
 
         java_resource.append("import java.io.Serializable;\r\n");
@@ -165,6 +165,10 @@ public class SQLiteGenerator implements Generator {
                         java_method_declaration.append("\tpublic Integer get").append(propertyNameOfMethod).append("()\r\n");
                         java_method_declaration.append("\t{\r\n");
                         java_method_declaration.append("\t\treturn Integer.parseInt(this.").append(propertyNameOfMethod).append(".toString());\r\n");
+                    } else if ("long".equalsIgnoreCase(propertyType)) {
+                        java_method_declaration.append("\tpublic Long get").append(propertyNameOfMethod).append("()\r\n");
+                        java_method_declaration.append("\t{\r\n");
+                        java_method_declaration.append("\t\treturn Long.parseLong(this.").append(propertyNameOfMethod).append(".toString());\r\n");
                     }
 
                     java_method_declaration.append("\t}\r\n\r\n");
@@ -207,10 +211,10 @@ public class SQLiteGenerator implements Generator {
             }
         }
 
-        Path java_src_path = Paths.get(this.path);
+        Path java_src_path = Paths.get(fullPath);
 
         // Replace path separators to handle Windows paths
-        String normalizedPath = this.path.replace("\\", "/");
+        String normalizedPath = fullPath.replace("\\", "/");
         String resourcePath = normalizedPath.replace("main/java", "main/resources");
         Path java_resource_path = Paths.get(resourcePath + ".map.xml");
 
@@ -252,7 +256,7 @@ public class SQLiteGenerator implements Generator {
         java_resource.append("\t}\r\n\r\n");
         java_resource.append("}");
 
-        FileGenerator generator = new FileGenerator(this.path + ".java", java_resource);
+        FileGenerator generator = new FileGenerator(fullPath + ".java", java_resource);
         generator.save();
     }
 
