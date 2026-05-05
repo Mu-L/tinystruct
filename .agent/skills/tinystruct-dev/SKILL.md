@@ -532,7 +532,7 @@ Read these when you need deeper context beyond what's in this skill:
 - `README.md` — quick start and architecture diagram; read for project setup or onboarding questions
 - `src/main/java/org/tinystruct/AbstractApplication.java` — complete base class; read when working with lifecycle hooks or unfamiliar inherited methods
 - `src/main/java/org/tinystruct/system/annotation/Action.java` — annotation definition + `Mode` enum; read for edge cases around routing modes
-- `src/main/java/org/tinystruct/application/ActionRegistry.java` 閳?routing engine internals; read when debuggin                                                                                                              ng route resolution or priority conflicts
-- `src/test/java/org/tinystruct/application/ActionRegistryTest.java` 閳?registry test examples; read when writin                                                                                                              ng tests involving `ActionRegistry`
-- `src/test/java/org/tinystruct/system/HttpServerHttpModeTest.java` 閳?HTTP mode and server integration test patterns; read when testing HTTP actions or server lifecycle
+- `src/main/java/org/tinystruct/application/ActionRegistry.java` — routing engine internals; read when debugging                                                                                                              ng route resolution or priority conflicts
+- `src/test/java/org/tinystruct/application/ActionRegistryTest.java` — registry test examples; read when writing                                                                                                              ng tests involving `ActionRegistry`
+- `src/test/java/org/tinystruct/system/HttpServerHttpModeTest.java` — HTTP mode and server integration test patterns; read when testing HTTP actions or server lifecycle
 
